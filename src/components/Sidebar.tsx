@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { Project } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { CalendarNavIcon, ChevronDownIcon, DashboardIcon, PlusIcon, TasksIcon } from "./icons";
@@ -11,8 +11,15 @@ import { NewProjectModal } from "./NewProjectModal";
 
 export function Sidebar({ projects, onChange }: { projects: Project[]; onChange: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [showNewTask, setShowNewTask] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+
+  function logout() {
+    localStorage.removeItem("token");
+    router.push("/login");
+  }
 
   return (
     <div className="flex w-[264px] shrink-0 flex-col border-r border-border bg-surface p-4">
@@ -87,13 +94,29 @@ export function Sidebar({ projects, onChange }: { projects: Project[]; onChange:
 
       <div className="flex-1" />
 
-      <div className="mt-2 flex items-center gap-2.5 border-t border-border px-2 pt-3">
-        <Avatar assignee={currentUser} size={32} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13.5px] font-semibold">{currentUser.name}</div>
-          <div className="text-xs text-text-3">Cheffe de projet</div>
-        </div>
-        <ChevronDownIcon className="shrink-0 text-text-3" />
+      <div className="relative mt-2 border-t border-border pt-3">
+        <button
+          onClick={() => setShowAccountMenu((v) => !v)}
+          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left hover:bg-surface-alt"
+        >
+          <Avatar assignee={currentUser} size={32} />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13.5px] font-semibold">{currentUser.name}</div>
+            <div className="text-xs text-text-3">Cheffe de projet</div>
+          </div>
+          <ChevronDownIcon className="shrink-0 text-text-3" />
+        </button>
+
+        {showAccountMenu && (
+          <div className="absolute bottom-full left-2 mb-1 w-[calc(100%-16px)] overflow-hidden rounded-lg border border-border bg-white shadow-lg">
+            <button
+              onClick={logout}
+              className="w-full px-3.5 py-2.5 text-left text-sm font-medium text-danger hover:bg-surface-alt"
+            >
+              Se déconnecter
+            </button>
+          </div>
+        )}
       </div>
 
       {showNewTask && (
